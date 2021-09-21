@@ -147,10 +147,8 @@ class EventList extends StatelessWidget {
     return ListView.builder(
       // shrinkWrap: true,
       scrollDirection: Axis.horizontal,
-      itemCount: data.length,
+      itemCount: data.length - 1,
       itemBuilder: (context, index) {
-        print(data.length);
-        print("Showing event number $index");
         return EventListCard(event: data[index]);
       },
     );
