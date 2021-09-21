@@ -1,22 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:look_acara/controllers/login_and_register_controller.dart';
 import 'package:look_acara/controllers/register_controller.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
+GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
 class RegisterPage extends StatelessWidget {
-  RegisterController registerController = Get.put(RegisterController());
-  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  RegisterController registerController = Get.find<RegisterController>();
+  LoginAndRegisterController loginAndRegisterController =
+      Get.find<LoginAndRegisterController>();
+
   var confirmPass;
+
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(
       BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width,
-          maxHeight: MediaQuery.of(context).size.height),
+        maxWidth: MediaQuery.of(context).size.width,
+        maxHeight: MediaQuery.of(context).size.height,
+      ),
       designSize: Size(376, 726),
     );
+
     return ScreenTypeLayout(
       breakpoints: ScreenBreakpoints(
         tablet: 600,
@@ -354,7 +362,61 @@ class RegisterPage extends StatelessWidget {
                     ),
                   ],
                 ),
-                Container(width: 1000.w, height: 12.w),
+                Container(width: 1000.w, height: 28.w),
+                Row(
+                  children: [
+                    Padding(padding: EdgeInsets.only(left: 24.w)),
+                    Container(
+                      width: 328.w,
+                      height: 1.w,
+                      color: Color(0xFFD8DCE0),
+                    ),
+                    Padding(padding: EdgeInsets.only(left: 24.w)),
+                  ],
+                ),
+                Container(width: 1000.w, height: 16.w),
+                Row(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(left: 24.w),
+                    ),
+                    Container(
+                      height: 44.w,
+                      width: 328.w,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.w),
+                        border: Border.all(color: Color(0xFF0f84DE)),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            // Get.to(RegisterPage());
+                            print(
+                                "changingPageIndex: from ${loginAndRegisterController.pageIndex.value}");
+                            loginAndRegisterController.changePageIndex(0);
+                            print(
+                                "to ${loginAndRegisterController.pageIndex.value}");
+                          },
+                          child: Center(
+                            child: Text(
+                              "Back to Login",
+                              style: TextStyle(
+                                fontFamily: "Inter",
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF0F84DE),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(right: 24.w),
+                    ),
+                  ],
+                ),
                 Padding(
                   padding: EdgeInsets.only(
                       bottom: MediaQuery.of(context).viewInsets.bottom),

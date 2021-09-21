@@ -24,6 +24,8 @@ dependencies:
   flutter:
     sdk: flutter
   get: ^4.3.8
+  http: any
+  shared_preferences: any
   flutter_screenutil: ^5.0.0+2
   responsive_builder: ^0.4.1
   flutter_svg: ^0.22.0
