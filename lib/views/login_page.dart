@@ -6,12 +6,16 @@ import 'package:responsive_builder/responsive_builder.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
+class EmailController extends TextEditingController {}
+
+class PasswordController extends TextEditingController {}
+
 class LoginPage extends StatelessWidget {
   LoginController loginController = Get.find<LoginController>();
   LoginAndRegisterController loginAndRegisterController =
       Get.find<LoginAndRegisterController>();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  EmailController emailController = Get.put(EmailController());
+  PasswordController passwordController = Get.put(PasswordController());
 
   @override
   Widget build(BuildContext context) {
@@ -111,9 +115,7 @@ class LoginPage extends StatelessWidget {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5.w),
                               ),
-                              hintText: emailController.text.isNotEmpty
-                                  ? emailController.text
-                                  : "example@mail.com",
+                              hintText: "",
                               contentPadding: EdgeInsets.only(
                                   top: 10.w, bottom: 10.w, left: 12.w),
                             ),
@@ -165,9 +167,7 @@ class LoginPage extends StatelessWidget {
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(5.w),
                                 ),
-                                hintText: passwordController.text.isNotEmpty
-                                    ? passwordController.text
-                                    : "*********",
+                                hintText: "",
                                 suffixIcon: IconButton(
                                   icon: Obx(() {
                                     if (loginController.isObscure.value) {
@@ -208,7 +208,6 @@ class LoginPage extends StatelessWidget {
                             color: Colors.transparent,
                             child: InkWell(
                               onTap: () {
-                                loginController.isLoading.value = true;
                                 loginController.login(emailController.text,
                                     passwordController.text);
                               },
