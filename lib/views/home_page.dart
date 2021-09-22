@@ -147,7 +147,7 @@ class EventList extends StatelessWidget {
     return ListView.builder(
       // shrinkWrap: true,
       scrollDirection: Axis.horizontal,
-      itemCount: data.length - 1,
+      itemCount: data.length,
       itemBuilder: (context, index) {
         return EventListCard(event: data[index]);
       },
@@ -295,15 +295,25 @@ class EventListCard extends StatelessWidget {
                           color: Color(0xFF0F84DE),
                         ),
                       ),
-                      Text(
-                        "${event.ticketing![0]!.price!}",
-                        style: TextStyle(
-                          fontFamily: "Inter",
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF0F84DE),
-                        ),
-                      ),
+                      (event.ticketing!.length > 0)
+                          ? Text(
+                              "${event.ticketing![0]!.price}",
+                              style: TextStyle(
+                                fontFamily: "Inter",
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF0F84DE),
+                              ),
+                            )
+                          : Text(
+                              "${"-"}",
+                              style: TextStyle(
+                                fontFamily: "Inter",
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF0F84DE),
+                              ),
+                            ),
                     ],
                   ),
                 ],
