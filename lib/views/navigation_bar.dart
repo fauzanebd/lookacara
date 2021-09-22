@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:look_acara/controllers/login_controller.dart';
 import 'package:look_acara/controllers/navigation_bar_controller.dart';
 import 'package:look_acara/views/explore_page.dart';
 import 'package:look_acara/views/home_page.dart';
+import 'package:look_acara/views/login_and_register_page.dart';
 import 'package:look_acara/views/login_page.dart';
 import 'package:look_acara/views/ticket_page.dart';
 import 'package:look_acara/views/wishlist_page.dart';
@@ -19,6 +21,8 @@ class NavigationBar extends StatelessWidget {
       ),
       designSize: Size(376, 726),
     );
+
+    LoginController loginController = Get.put(LoginController());
 
     final TextStyle unselectedLabelStyle = TextStyle(
       fontFamily: "Inter",
@@ -98,9 +102,13 @@ class NavigationBar extends StatelessWidget {
                     BottomNavigationBarItem(
                       icon: Container(
                         margin: EdgeInsets.only(bottom: 4.w),
-                        child: Icon(Icons.login, size: 22.w),
+                        child: loginController.isLoggedIn.value
+                            ? Icon(Icons.person_outline, size: 22.w)
+                            : Icon(Icons.login, size: 22.w),
                       ),
-                      label: "Login",
+                      label: loginController.isLoggedIn.value
+                          ? "Account"
+                          : "Login",
                       backgroundColor: Color(0xFFFDFDFC),
                     ),
                   ],
@@ -116,7 +124,7 @@ class NavigationBar extends StatelessWidget {
                 ExplorePage(),
                 WishListPage(),
                 TicketPage(),
-                LoginPage(),
+                LoginAndRegisterPage(),
               ],
             ),
           ),

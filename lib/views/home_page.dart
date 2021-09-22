@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:look_acara/controllers/home_controller.dart';
+import 'package:look_acara/models/event.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+  HomeController homeController = Get.put(HomeController());
+
+  Future<void> autoRefresh() async {
+    await homeController.fetchEvents();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,34 +32,45 @@ class HomePage extends StatelessWidget {
         body: SafeArea(
           child: Stack(
             children: [
-              SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Container(height: 110.w),
-                    Row(
+              Container(
+                child: RefreshIndicator(
+                  onRefresh: autoRefresh,
+                  child: SingleChildScrollView(
+                    child: Column(
                       children: [
-                        Padding(padding: EdgeInsets.only(left: 16.w)),
-                        Container(
-                          width: 344.w,
-                          height: 156.w,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: AssetImage(
-                                'assets/images/HomePageImage.jpg',
+                        Container(height: 110.w),
+                        Row(
+                          children: [
+                            Padding(padding: EdgeInsets.only(left: 16.w)),
+                            Container(
+                              width: 344.w,
+                              height: 156.w,
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: AssetImage(
+                                    'assets/images/HomePageImage.jpg',
+                                  ),
+                                  fit: BoxFit.fill,
+                                ),
                               ),
-                              fit: BoxFit.fill,
                             ),
-                          ),
+                            Padding(padding: EdgeInsets.only(right: 16.w)),
+                          ],
                         ),
-                        Padding(padding: EdgeInsets.only(right: 16.w)),
+                        Container(height: 22.w),
+                        EventList(
+                          listName: "Events Near Jakarta",
+                          events: homeController.eventList,
+                        ),
+                        Container(height: 22.w),
+                        EventList(
+                          listName: "Recommended For You",
+                          events: homeController.eventList,
+                        ),
+                        Container(height: 22.w),
                       ],
                     ),
-                    Container(height: 22.w),
-                    EventList(listName: "Events Near Jakarta"),
-                    Container(height: 22.w),
-                    EventList(listName: "Recommended For You"),
-                    Container(height: 22.w),
-                  ],
+                  ),
                 ),
               ),
               HomePageHeader(),
@@ -66,7 +84,10 @@ class HomePage extends StatelessWidget {
 
 class EventList extends StatelessWidget {
   final String listName;
-  const EventList({required this.listName});
+  final List<Event> events;
+  EventList({required this.listName, required this.events});
+
+  HomeController homeController = Get.find<HomeController>();
 
   @override
   Widget build(BuildContext context) {
@@ -104,24 +125,62 @@ class EventList extends StatelessWidget {
         Container(
           padding: EdgeInsets.only(left: 16.w),
           height: 200.w,
-          child: ListView.builder(
-            shrinkWrap: true,
-            scrollDirection: Axis.horizontal,
-            itemCount: 15,
-            itemBuilder: (BuildContext context, int index) {
-              return NearestEventCard();
+          child: FutureBuilder<List<Event>>(
+            future: homeController.fetchEvents(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                print(snapshot.data);
+                List<Event> data = snapshot.data!;
+                return _eventListViewBuilder(data);
+              } else if (snapshot.hasError) {
+                return Text("${snapshot.error}");
+              }
+              return CircularProgressIndicator();
             },
           ),
         ),
       ],
     );
   }
+
+  ListView _eventListViewBuilder(List<Event> data) {
+    return ListView.builder(
+      // shrinkWrap: true,
+      scrollDirection: Axis.horizontal,
+      itemCount: data.length,
+      itemBuilder: (context, index) {
+        return EventListCard(event: data[index]);
+      },
+    );
+  }
 }
 
-class NearestEventCard extends StatelessWidget {
-  const NearestEventCard({
-    Key? key,
-  }) : super(key: key);
+class EventListCard extends StatelessWidget {
+  EventListCard({required this.event});
+  Event event;
+
+  bool isDiffDate(DateTime date1, DateTime date2) {
+    if (date1.difference(date2).inDays > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  List<String> monthList = <String>[
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember"
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +196,10 @@ class NearestEventCard extends StatelessWidget {
                 height: 104,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('assets/images/HomePageImage.jpg'),
+                    image: NetworkImage(
+                      event.eventImage ??
+                          'https://i.pinimg.com/originals/68/a9/d7/68a9d7ff43241336410315b1517fdcb6.jpg',
+                    ),
                     fit: BoxFit.fill,
                   ),
                 ),
@@ -160,7 +222,7 @@ class NearestEventCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Kidscares Charity Night",
+                            event.eventName!,
                             overflow: TextOverflow.fade,
                             style: TextStyle(
                               fontFamily: "Inter",
@@ -171,7 +233,9 @@ class NearestEventCard extends StatelessWidget {
                           ),
                           Container(height: 4.w),
                           Text(
-                            "11 Sep 2021, 19:00 WIB",
+                            isDiffDate(event.eventStart!, event.eventEnd!)
+                                ? "${event.eventStart!.day} ${monthList[event.eventStart!.month - 1]} - ${event.eventStart!.day} ${monthList[event.eventStart!.month - 1]}"
+                                : "${event.eventStart!.day} ${monthList[event.eventStart!.month - 1]}",
                             style: TextStyle(
                               fontFamily: "Inter",
                               fontSize: 12.sp,
@@ -192,7 +256,7 @@ class NearestEventCard extends StatelessWidget {
                   ),
                   Container(height: 6.w),
                   Text(
-                    "Kuningan City - Setia Budi Jakarta Utara",
+                    event.location!,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -208,7 +272,7 @@ class NearestEventCard extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    "Available",
+                    event.eventStatus!,
                     style: TextStyle(
                       fontFamily: "Inter",
                       fontSize: 12.sp,
@@ -220,14 +284,37 @@ class NearestEventCard extends StatelessWidget {
                     flex: 1,
                     child: Padding(padding: EdgeInsets.only(right: 16.w)),
                   ),
-                  Text(
-                    "Rp20.000",
-                    style: TextStyle(
-                      fontFamily: "Inter",
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F84DE),
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        "start from  ",
+                        style: TextStyle(
+                          fontFamily: "Inter",
+                          fontSize: 7.sp,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0F84DE),
+                        ),
+                      ),
+                      (event.ticketing!.length > 0)
+                          ? Text(
+                              "${event.ticketing![0]!.price}",
+                              style: TextStyle(
+                                fontFamily: "Inter",
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF0F84DE),
+                              ),
+                            )
+                          : Text(
+                              "${"-"}",
+                              style: TextStyle(
+                                fontFamily: "Inter",
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF0F84DE),
+                              ),
+                            ),
+                    ],
                   ),
                 ],
               ),
@@ -296,48 +383,6 @@ class HomePageHeader extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ],
-    );
-  }
-}
-
-class ChatItem extends StatelessWidget {
-  final String? contactName;
-  final String? chatDetails;
-  final String? time;
-  final String? imageUrl;
-  const ChatItem({
-    Key? key,
-    this.contactName,
-    this.chatDetails,
-    this.time,
-    this.imageUrl,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        ListTile(
-          contentPadding: EdgeInsets.all(10),
-          title: Text(contactName!),
-          subtitle: Text(
-            chatDetails!,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          leading: CircleAvatar(
-            backgroundImage: NetworkImage(
-              imageUrl!,
-            ),
-          ),
-          trailing: Text("10.02 PM"),
-          tileColor: Colors.cyan,
-          // dense: true,
-        ),
-        Container(
-          height: 2,
         ),
       ],
     );
